@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import os
 import random
 import sys
 import time
@@ -16,7 +15,6 @@ import torch.nn as nn
 
 from immutable.data import get_dataloaders
 from immutable.metrics import (
-    accuracy_from_logits,
     count_parameters,
     measure_latency_ms,
     pareto_score,

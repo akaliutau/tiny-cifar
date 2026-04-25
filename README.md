@@ -3,7 +3,7 @@
 This is a self-contained research-problem bundle for an autonomous evolver demo.
 
 
-## Installation (needed only for local tests and origin developement)
+## Installation (needed only for local tests and origin development)
 
 **Clone the repository**
 

@@ -11,8 +11,8 @@ build:
   base_image: pytorch/pytorch:2.11.0-cuda13.0-cudnn9-runtime
   requirements: requirements.txt
 files:
-  include: ["train_eval.py", "requirements.txt", "src/**"]
-  required: ["train_eval.py", "requirements.txt"]
+  include: ["train_eval.py", "model.py", "requirements.txt", "immutable/**"]
+  required: ["train_eval.py", "model.py", "requirements.txt"]
 source:
   gcs_prefix: gs://${BUCKET_NAME}/acr-sources/tiny-cifar
 runtime:
