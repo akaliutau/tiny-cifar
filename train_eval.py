@@ -4,6 +4,7 @@ import argparse
 import importlib.util
 import random
 import sys
+import os
 import time
 import traceback
 from pathlib import Path
@@ -26,9 +27,17 @@ from immutable.schema import Metrics, failure_metrics
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Train/evaluate mutable model.py for Tiny CIFAR-10 Model Golf.")
-    p.add_argument("--run-id", default=None, help="Run identifier. Defaults to timestamp.")
+    p.add_argument(
+        "--run-id",
+        default=os.environ.get("ACR_RUN_ID"),
+        help="Run identifier. Defaults to ACR_RUN_ID, then timestamp.",
+    )
     p.add_argument("--data-dir", default="data", help="Dataset directory.")
-    p.add_argument("--out-dir", default="runs", help="Output directory for run artifacts.")
+    p.add_argument(
+        "--out-dir",
+        default=os.environ.get("ACR_ARTIFACT_DIR", "runs"),
+        help="Output directory for run artifacts. Defaults to ACR_ARTIFACT_DIR when running under the cloud runner.",
+    )
     p.add_argument("--dataset", choices=["cifar10", "synthetic"], default="cifar10")
     p.add_argument("--download-cifar", action="store_true", help="Allow torchvision to download CIFAR-10.")
     p.add_argument("--no-synthetic-fallback", action="store_true", help="Fail instead of using synthetic fallback.")
@@ -174,7 +183,20 @@ def run(args: argparse.Namespace) -> Dict[str, Any]:
     run_id = args.run_id or time.strftime("run_%Y%m%d_%H%M%S")
     args.run_id = run_id
     root = Path(__file__).resolve().parent
-    run_dir = root / args.out_dir / run_id
+    # In Cloud Runner jobs, ACR_OUTPUT_GCS_URI already identifies the unique
+    # remote run directory and the stable runner syncs ACR_ARTIFACT_DIR to it.
+    # When --out-dir is left at the cloud-runner default, write metrics.json,
+    # run_summary.md, and artifacts/ directly inside that synced directory.
+    # Local/non-cloud runs keep the historical <out-dir>/<run-id> layout.
+    out_root = Path(args.out_dir)
+    if not out_root.is_absolute():
+        out_root = root / out_root
+
+    if os.environ.get("ACR_ARTIFACT_DIR") and Path(args.out_dir) == Path(os.environ["ACR_ARTIFACT_DIR"]):
+        run_dir = out_root
+    else:
+        run_dir = out_root / run_id
+
     artifacts_dir = run_dir / "artifacts"
     run_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir.mkdir(parents=True, exist_ok=True)
