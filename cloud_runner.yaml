@@ -20,7 +20,7 @@ runtime:
   workdir: /workspace/app
 # Optional; override with --dataset gs://bucket/path when needed.
 dataset:
-  uri: gs://${BUCKET_NAME}/datasets/tiny-cifar10
+  uri: gs://${BUCKET_NAME}/datasets/tiny-cifar10/cifar-10-batches-py.tar.gz
   container_dir: /workspace/app/data
   unpack: auto
 cloud_run:
@@ -34,7 +34,7 @@ cloud_run:
   task_timeout: 3600s
 artifacts:
   container_dir: /workspace/artifacts
-  gcs_prefix: gs://${BUCKET_NAME}/acr-runs/minimal-train
-  local_dir: ./artifacts/minimal-train-latest
+  gcs_prefix: gs://${BUCKET_NAME}/acr-runs/tiny-cifar
+  local_dir: ./artifacts/tiny-cifar-latest
 env:
   PYTHONUNBUFFERED: "1"
